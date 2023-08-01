@@ -26,7 +26,7 @@ function render(element, container) {
   const dom = 
     element.type === "TEXT_ELEMENT"
       ? document.createTextNode("")
-      : document.createTextElement(element.type)
+      : document.createElement(element.type)
   
   const isProperty = key => key !== "children"
 
@@ -48,14 +48,16 @@ function render(element, container) {
 
 const Didact = {
   createElement,
+  render,
 }
 
-const element = Didact.createElement(
-  "div",
-  { id: "foo" },
-  Didact.createElement("a", null, "bar"),
-  Didact.createElement("b")
-)
+/** @jsx Didact.createElement */
+const element = (
+  <div style="background: salmon">
+    <h1>Hello World</h1>
+    <h2 style="text-align:right">from Didact</h2>
+  </div>
+);
 
 const container = document.getElementById("root")
-ReactDOM.render(element, container)
+Didact.render(element, container)

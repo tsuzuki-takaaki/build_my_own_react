@@ -1,0 +1,18 @@
+{
+  "name": "build_my_own_react",
+  "version": "1.0.0",
+  "description": "",
+  "main": "myreact.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/babel myreact.js -o build_react.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.22.9",
+    "@babel/core": "^7.22.9",
+    "@babel/preset-env": "^7.22.9",
+    "@babel/preset-react": "^7.22.5"
+  }
+}
