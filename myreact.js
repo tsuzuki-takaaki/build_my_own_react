@@ -22,6 +22,30 @@ function createTextElement(text) {
   }
 }
 
+function render(element, container) {
+  const dom = 
+    element.type === "TEXT_ELEMENT"
+      ? document.createTextNode("")
+      : document.createTextElement(element.type)
+  
+  const isProperty = key => key !== "children"
+
+  // check properties without children
+  // the properties are the attribute of the element(children is about childrens' info)
+  Object.keys(element.props)
+    .filter(isProperty)
+    .forEach(name => {
+      dom[name] = element.props[name]
+    })
+  
+  // check recursively
+  element.props.children.forEach(child =>
+    render(child, dom)
+  )
+
+  container.appendChild(dom)
+}
+
 const Didact = {
   createElement,
 }
