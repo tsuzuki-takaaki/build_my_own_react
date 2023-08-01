@@ -51,6 +51,8 @@ const Didact = {
   render,
 }
 
+// *********** Content ***********
+// 
 /** @jsx Didact.createElement */
 const element = (
   <div style="background: salmon">
@@ -58,6 +60,9 @@ const element = (
     <h2 style="text-align:right">from Didact</h2>
   </div>
 );
+
+//
+// *********** /Content ***********
 
 const container = document.getElementById("root")
 Didact.render(element, container)
