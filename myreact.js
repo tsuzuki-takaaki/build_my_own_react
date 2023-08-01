@@ -52,7 +52,8 @@ const Didact = {
 }
 
 // *********** Content ***********
-// 
+
+
 /** @jsx Didact.createElement */
 const element = (
   <div style="background: salmon">
@@ -61,7 +62,7 @@ const element = (
   </div>
 );
 
-//
+
 // *********** /Content ***********
 
 const container = document.getElementById("root")
