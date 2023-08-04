@@ -61,16 +61,27 @@ function commitWork(fiber) {
   if (!fiber) {
     return;
   }
-  const domParent = fiber.parent.dom;
+  let domParentFiber = fiber.parent;
+  while (!domParentFiber.dom) {
+    domParentFiber = domParentFiber.parent;
+  }
+  const domParent = domParentFiber.dom;
   if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
     domParent.appendChild(fiber.dom);
   } else if (fiber.effectTag === "DELETION") {
-    domParent.removeChild(fiber.dom);
+    commitDeletion(fiber, domParent);
   } else if (fiber.effectTag === "UPDATE" && fiber.dom != null) {
     updateDom(fiber.dom, fiber.alternate.props, fiber.props);
   }
   commitWork(fiber.child);
   commitWork(fiber.sibling);
+}
+function commitDeletion(fiber, domParent) {
+  if (fiber.dom) {
+    domParent.removeChild(fiber.dom);
+  } else {
+    commitDeletion(fiber.child, domParent);
+  }
 }
 function render(element, container) {
   wipRoot = {
@@ -105,19 +116,12 @@ requestIdleCallback(workLoop);
 // add the element to the DOM
 // select the next unit of work
 function performUnitOfWork(fiber) {
-  if (!fiber.dom) {
-    fiber.dom = createDom(fiber);
+  const isFunctionComponent = fiber.type instanceof Function;
+  if (isFunctionComponent) {
+    updateFunctionComponent(fiber);
+  } else {
+    updateHostComponent(fiber);
   }
-  // wipRoot = {
-  //   dom: container,
-  //   props: {
-  //     children: [element], <- ネストしているタグの配列
-  //   },
-  //   alternate: currentRoot,
-  // }
-  const elements = fiber.props.children;
-  reconcileChildren(fiber, elements);
-
   // When the fiber is parent[Parent-Child]
   // The child fiber will be nextUnitOfWork
   if (fiber.child) {
@@ -134,6 +138,23 @@ function performUnitOfWork(fiber) {
     // If reaching root, nextFiber will be null and break this loop
     nextFiber = nextFiber.parent;
   }
+}
+function updateFunctionComponent(fiber) {
+  const children = [fiber.type(fiber.props)]; // <= const children = [App(fiber.props)] <= call function here
+  reconcileChildren(fiber, children);
+}
+function updateHostComponent(fiber) {
+  if (!fiber.dom) {
+    fiber.dom = createDom(fiber);
+  }
+  // wipRoot = {
+  //   dom: container,
+  //   props: {
+  //     children: [element], <- ネストしているタグの配列
+  //   },
+  //   alternate: currentRoot,
+  // }
+  reconcileChildren(fiber, fiber.props.children);
 }
 
 // create the fibers for the element’s children
@@ -201,11 +222,12 @@ const Didact = {
 // *********** Content ***********
 
 /** @jsx Didact.createElement */
-const element = Didact.createElement("div", {
-  style: "background: salmon"
-}, Didact.createElement("h1", null, "Hello World"), Didact.createElement("h2", {
-  style: "text-align:right"
-}, "from Didact"));
+function App(props) {
+  return Didact.createElement("h1", null, "Hi ", props.name);
+}
+const element = Didact.createElement(App, {
+  name: "foo"
+});
 
 // *********** /Content ***********
 
