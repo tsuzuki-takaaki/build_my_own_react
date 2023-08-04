@@ -150,6 +150,7 @@ const Didact = {
 
 // *********** Content ***********
 
+// Refs: https://shinshin86.hateblo.jp/entry/2021/07/08/161209
 /** @jsxRuntime classic */
 /** @jsx Didact.createElement */
 const element = (
