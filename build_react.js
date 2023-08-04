@@ -25,15 +25,32 @@ function createDom(fiber) {
   });
   return dom;
 }
+function commitRoot() {
+  // See wipRoot structure with console
+  // console.log(wipRoot)
+  commitWork(wipRoot.child);
+  wipRoot = null;
+}
+function commitWork(fiber) {
+  if (!fiber) {
+    return;
+  }
+  const domParent = fiber.parent.dom;
+  domParent.appendChild(fiber.dom);
+  commitWork(fiber.child);
+  commitWork(fiber.sibling);
+}
 function render(element, container) {
-  nextUnitOfWork = {
+  wipRoot = {
     dom: container,
     props: {
       children: [element]
     }
   };
+  nextUnitOfWork = wipRoot;
 }
 let nextUnitOfWork = null;
+let wipRoot = null;
 
 // Scheduler for browser rendering
 function workLoop(deadline) {
@@ -41,6 +58,9 @@ function workLoop(deadline) {
   while (nextUnitOfWork && !shouldYield) {
     nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
     shouldYield = deadline.timeRemaining() < 1;
+  }
+  if (!nextUnitOfWork && wipRoot) {
+    commitRoot();
   }
   requestIdleCallback(workLoop);
 }
@@ -52,11 +72,6 @@ requestIdleCallback(workLoop);
 function performUnitOfWork(fiber) {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber);
-  }
-
-  // When the fiber is child[Parent-child]
-  if (fiber.parent) {
-    fiber.parent.dom.appendChild(fiber.dom);
   }
   const elements = fiber.props.children;
   let index = 0;
